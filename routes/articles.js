@@ -17,6 +17,8 @@ function createArticle(req, res) {
 }
 
 function getArticles(req, res) {
+    console.log('get articles');
+    console.log(req.user);
     articleServices.getArticles().then(data => {
         console.log(data);
         res.status(200).json({error: false, articles: data})

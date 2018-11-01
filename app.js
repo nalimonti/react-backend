@@ -4,6 +4,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const knex = require('./knex/knex.js');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -17,6 +18,34 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+
+app.use(function(req, res, next) {
+    console.log('auth check');
+    console.log(req.headers);
+    let token = req.headers['authorization'];
+    console.log(`token: ${token}`);
+
+    if (!token) {
+        console.log('no token found');
+        return next();
+    }
+
+    token = token.replace('Bearer', '').trim();
+    console.log(token);
+
+    jwt.verify(token, 'secretkey', function(err, user) {
+        if (err) {
+            console.log('error');
+            console.log(err);
+        }
+        else {
+            console.log('success');
+            console.log(user);
+            req.user = user;
+            next();
+        }
+    });
+});
 
 app.all('*', function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
